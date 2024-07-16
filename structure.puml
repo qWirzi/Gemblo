@@ -1,0 +1,207 @@
+@startuml
+
+class AllPieces {
+
+    + a : ArrayList<Piece>
+    - p1 : Piece
+    - p2 : Piece
+    - p3fat : Piece
+    - p3curve : Piece
+    - p3line : Piece
+    - p4wind : Piece
+    - p4line : Piece
+    - p4romb : Piece
+    - p4zig : Piece
+    - p4hug : Piece
+    - pg5line : Piece
+    - p5vi : Piece
+    - p5zig : Piece
+    - p5strange : Piece
+    - p5wing : Piece
+    - p5broken : Piece
+    - p5flower : Piece
+    - p5bumerang : Piece
+
+    + getPiece(index : int) : Piece
+    + findPeaceIndexByCoords(targetPiece : Piece) : int
+}
+
+class BoardInternal {
+    + width : int
+    + nRows : int
+    + boardMatrix : Cell[][]
+    + nPlayers : int
+    - sstep : String
+    - step : String
+    + boardHistory : List<Cell[][]>
+    - currentIter : int
+    + ArrayList<ArrayList<Piece>> piecesOnBoard
+
+    + getWidth() : int
+    + getNRows() : int
+    - calculateNumberOfCells(row : int, width : int) : int
+    + BoardInternal(type : String, nRows : int, width : int, spacing : String, nPlayers : int)
+    + StringState(state : CellState) : String
+    + printBoard() : void
+    - checkWithinBoardNoOverlap(piece : RealPiece) : boolean
+    - checkNoTouch (piece : RealPiece) : boolean
+    - checkBridge (piece : RealPiece) : boolean
+    + place(piece : p, r : int, c : int, angle : int) : boolean
+    + determineWinner() : CellState
+    + stepBack() : BoardInternal
+
+
+}
+
+class Cell {
+    r : int
+    p : int
+    + state : CellState
+
+    + Cell()
+    + Cell(state: CellState, r: int, p: int)
+    + setState(newState: CellState) : CellState
+}
+
+enum CellState {
+    EMPTY
+    OCCUPIED
+    FORBIDDEN
+    RED
+    YELLOW
+    GREEN
+    BLUE
+    PURPLE
+    BlACK
+}
+
+class GameInterface {
+    + nPlayers : int
+    + currentPlayer : int
+    board : BoardInternal
+    allIcons : IconBoards[]
+    in : Scanner
+    GAME_FINISHED : boolean
+    - hexagonBoard : HexagonBoard
+
+    + move() : void
+    + undoLastMove() : void
+    + confirmMove() : void
+    + finishGame() : void
+    + placeByMouse : void
+    + turnIcon(piece : Piece) : void
+
+    + main(args : String[]) : void
+}
+
+
+class Hexagon {
+    - x : double
+    - y : double
+    - size : int
+    - color : Color
+    - text : String
+    - angle : int
+
+    + Hexagon(x : double, y : double, size : int, color : Color, text : String, r : int, c : int, angle : int)
+    + draw(g2 : Graphics2D) : void
+    + drawText(g2 : Graphics2D) : void
+    + drawIndex(g2 : Graphics2D, index : String)
+    + drawDot(g2 : Graphics2D) : void
+    + drawAngle(g2 : Graphics2D) : void
+    + setAngle(newAngle : int) : void
+}
+
+class HexagonBoard extends JPanel {
+    - board : BoardInternal
+    - int : hexSize
+    + iconBoards : iconBoards[]
+    - int : smallHexSize
+    - allIconCorners : ArrayList<Hexagon>
+    + angles : int[]
+
+    + HexagonBoard(board : BoardInternal, hexSize : int, iconBoards : IconBoards[], smallHexSize : int)
+    + updateBoard(board : BoardInternal, iconBoards : IconBoards) : void
+    + updateBoard(board : BoardInternal, iconBoards : IconBoards[]) : void
+    - handleClickOnBoard( mouseX : int, mouseY : int) : void
+    - handleClickOnIconBoard( mouseX : int, mouseY : int) : void
+    - getColorFromCellState(state : CellState) : Color
+    + paintBoard(g2 : Graphics2D, hexSize : int, board : BoardInternal, startX : double, startY : double, drawText : boolean, index : int, angle : int) : void
+    + paintComponent(g : Graphics) : void
+    + getCurrentPlayer() : int
+
+}
+
+class IconBoards {
+    + iconsMatrix : ArrayList<SmallBoard>
+    - NrPlayer : int
+
+    + IconBoards(NrPlayer : int)
+    + setStandard() : void
+
+}
+
+class Piece {
+
+    + coords : int[][]
+    + size : int
+    + color : CellState
+
+    + getCellState() : CellState
+    + setColor(color : CellState) : Piece
+
+    + Piece(coords : int[][])
+
+}
+
+class RealPiece extends Piece {
+    + origPiece : Piece
+    + ringTouch : int[][]
+    + ring2 : int[][]
+    + ringBridge : int[][]
+    + realCoords : int[][]
+    + color : CellState
+
+    + setRealcoords (r : int, c : int) : void
+    + RealPiece(p : Piece, r : int , c : int)
+    + RealPiece(p : Piece, r : int , c : int, angle : int)
+    - cleanRing(d : int) : int[][]
+    - setRings() : void
+    + rotate(angle : int) : RealPiece
+}
+
+class SmallBoard extends BoardInternal {
+
+    + assignedPiece : Piece
+    + currentAngle : int
+    + isDisplayed : boolean
+
+    + SmallBoard(super : BoardInternal)
+    + place(p : Piece, r : int, c : int, angle : int) : boolean
+    + clearBoard(permanent : boolean) : void
+    + setStandard() : void
+
+}
+
+AllPieces ..> Piece : uses
+Piece "1" *--> "many" AllPieces
+BoardInternal ..> Cell : uses
+Cell "1" *--> "many" BoardInternal
+BoardInternal ..> RealPiece : uses
+
+
+Cell ..> CellState : has
+HexagonBoard ..> BoardInternal : uses
+HexagonBoard ..> IconBoards : uses
+HexagonBoard ..> Hexagon : uses
+HexagonBoard ..> SmallBoard : uses
+GameInterface ..> BoardInternal : uses
+GameInterface ..> HexagonBoard : uses
+GameInterface ..> AllPieces : uses
+SmallBoard <|-- BoardInternal
+RealPiece <|-- Piece
+IconBoards ..> SmallBoard : uses
+SmallBoard ..> Piece : has
+BoardInternal ..> RealPiece : uses
+
+@enduml
