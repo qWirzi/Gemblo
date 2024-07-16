@@ -3,7 +3,7 @@ A first try (tbu) of simulating the Gemblo board game in Java
 (this is not a proper README - a full version comes out one day later)
 
 ****************************************************************************************
-1. Declaration of properties and adhering the fair-code codex
+1. 
 ****************************************************************************************
 (blended out)
 Virzhiniia Frejlak, 14.07.2024
